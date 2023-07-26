@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -39,7 +40,9 @@ func Handler(update Update) (Response, error) {
 		})
 
 	fmt.Printf("Response %v\n", response)
-	fmt.Printf("Response Body %v\n", response.Body)
+	body, err := io.ReadAll(response.Body)
+
+	fmt.Printf("Response Body %v\n", body)
 	fmt.Printf("Error %v\n", err)
 
 	return Response{Ok: true}, nil
