@@ -25,7 +25,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		request := &openai.Request{
 			Model: openai.ModelGpt35Turbo,
 			Messages: []*openai.Message{
-				{Role: openai.RoleSystem, Content: "Without any extra comment about the code, what is the output of the following code? Only strictly the output."},
+				{Role: openai.RoleSystem, Content: "Keep strictly to say only the output, without any comment, what is the result of the following code?"},
 				{Role: openai.RoleUser, Content: strings.Trim(update.Message.Text, prefix)},
 			}}
 
