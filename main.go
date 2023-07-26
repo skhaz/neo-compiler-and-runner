@@ -3,7 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -36,27 +40,24 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	)
 
 	err := json.Unmarshal([]byte(request.Body), &u)
-	// v, err := p.Parse(request.Body)
 	if err != nil {
 		return response, err
 	}
 
 	fmt.Printf("Chat ID3: %d\n", u.Message.Chat.Id)
 
-	/*
-		response, err := http.PostForm(
-			telegramApi,
-			url.Values{
-				"chat_id": {strconv.Itoa(update.Message.Chat.Id)},
-				"text":    {"Ok!"},
-			})
+	x, err := http.PostForm(
+		telegramApi,
+		url.Values{
+			"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
+			"text":    {"Ok!"},
+		})
 
-		fmt.Printf("Response %v\n", response)
-		body, err := io.ReadAll(response.Body)
+	fmt.Printf("Response %v\n", response)
+	body, err := io.ReadAll(x.Body)
 
-		fmt.Printf("Response Body %s\n", string(body[:]))
-		fmt.Printf("Error %v\n", err)
-	*/
+	fmt.Printf("Response Body %s\n", string(body[:]))
+	fmt.Printf("Error %v\n", err)
 
 	return response, nil
 }
