@@ -25,8 +25,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		request := &openai.Request{
 			Model: openai.ModelGpt35Turbo,
 			Messages: []*openai.Message{
-				{Role: openai.RoleSystem, Content: "You are a compiler assistant who compiles or interpret code."},
-				{Role: openai.RoleSystem, Content: "Without any extra comment about the code, what is the output of the following code? Only the output."},
+				{Role: openai.RoleSystem, Content: "Without any extra comment about the code, what is the output of the following code? Only strictly the output."},
 				{Role: openai.RoleUser, Content: strings.Trim(update.Message.Text, prefix)},
 			}}
 
