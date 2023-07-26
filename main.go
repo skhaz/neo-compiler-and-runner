@@ -35,21 +35,14 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		response = events.APIGatewayProxyResponse{StatusCode: 200}
 	)
 
-	fmt.Printf("request.Body 1: %s", request.Body)
-
-	err := json.Unmarshal([]byte(request.Body), &u)
-	if err != nil {
-		return response, err
-	}
-
-	fmt.Printf("u.Message.Text4: %s", u.Message.Text)
+	json.Unmarshal([]byte(request.Body), &u)
 
 	if strings.HasPrefix(u.Message.Text, "/secret") {
 		http.PostForm(
 			telegramApi,
 			url.Values{
 				"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
-				"text":    {"Ok1"},
+				"text":    {"Ok2"},
 			})
 	}
 
