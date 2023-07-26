@@ -25,7 +25,9 @@ jobs:
 
       - name: Build Lambda Function
         run: |
-          dep ensure -v
+          go get -u -t -d -v ./...
+          go mod tidy
+          go mod vendor
           go build -ldflags="-s -w" -o main main.go
         env:
           GOARCH: arm64
