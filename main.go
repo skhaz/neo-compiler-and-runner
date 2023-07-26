@@ -16,9 +16,8 @@ const (
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
-		h        = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
-		update   = telegram.Parse(request.Body)
-		response = events.APIGatewayProxyResponse{StatusCode: 200}
+		h      = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+		update = telegram.Parse(request.Body)
 	)
 
 	if strings.HasPrefix(update.Message.Text, prefix) {
@@ -29,19 +28,19 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 				{Role: openai.RoleUser, Content: strings.Trim(update.Message.Text, prefix)},
 			}}
 
-		r, err := h.Do(request)
+		response, err := h.Do(request)
 		if err != nil {
-			return response, err
+			return events.APIGatewayProxyResponse{StatusCode: 500}, err
 		}
 
-		if r.Error != nil {
-			return response, err
+		if response.Error != nil {
+			return events.APIGatewayProxyResponse{StatusCode: 500}, err
 		}
 
-		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, r.Choices[0].Message.Content)
+		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, response.Choices[0].Message.Content)
 	}
 
-	return response, nil
+	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
 func main() {
