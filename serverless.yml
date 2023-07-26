@@ -9,7 +9,7 @@ provider:
   runtime: go1.x
 
 functions:
-  hello:
+  telegram:
     handler: bin/main
     environment:
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
