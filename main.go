@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/valyala/fastjson"
 )
 
 type Chat struct {
@@ -31,16 +31,17 @@ var telegramApi = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", os.G
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
-		p        fastjson.Parser
+		u        Update
 		response events.APIGatewayProxyResponse
 	)
 
-	v, err := p.Parse(request.Body)
+	err := json.Unmarshal([]byte(request.Body), &u)
+	// v, err := p.Parse(request.Body)
 	if err != nil {
 		return response, err
 	}
 
-	fmt.Printf("Chat ID2: %s\n", string(v.GetStringBytes("message", "chat", "id")[:]))
+	fmt.Printf("Chat ID3: %d\n", u.Message.Chat.Id)
 
 	/*
 		response, err := http.PostForm(
