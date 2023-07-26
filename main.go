@@ -28,7 +28,7 @@ type Response struct {
 	Ok bool `json:"ok"`
 }
 
-var telegramApi = fmt.Sprintf("https://api.telegram.org/bot/%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
+var telegramApi = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
 
 func Handler(update Update) (Response, error) {
 	response, err := http.PostForm(
