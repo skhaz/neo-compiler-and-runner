@@ -39,7 +39,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			return response, err
 		}
 
-		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, response.Choices[0].Message.Content)
+		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, r.Choices[0].Message.Content)
 	}
 
 	return response, nil
