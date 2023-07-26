@@ -6,13 +6,12 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"skhaz.dev/compliquer/pkg/openai"
 	"skhaz.dev/compliquer/pkg/telegram"
 )
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
-		openai   = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+		// openai   = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 		update   = telegram.Parse(request.Body)
 		response = events.APIGatewayProxyResponse{StatusCode: 200}
 	)
