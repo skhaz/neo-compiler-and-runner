@@ -10,7 +10,7 @@ provider:
 
 functions:
   hello:
-    handler: main
+    handler: bin/main
     environment:
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
       TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
