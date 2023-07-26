@@ -1,49 +1,34 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"skhaz.dev/compliquer/pkg/openai"
+	"skhaz.dev/compliquer/pkg/telegram"
 )
-
-type Chat struct {
-	Id int `json:"id"`
-}
-
-type Message struct {
-	Text string `json:"text"`
-	Chat Chat   `json:"chat"`
-}
-
-type Update struct {
-	UpdateId int     `json:"update_id"`
-	Message  Message `json:"message"`
-}
-
-var telegramApi = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
-		u        Update
+		openai   = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+		update   = telegram.Parse(request.Body)
 		response = events.APIGatewayProxyResponse{StatusCode: 200}
 	)
 
-	json.Unmarshal([]byte(request.Body), &u)
+	if strings.HasPrefix(update.Message.Text, "/secret") {
+		code := strings.Trim(update.Message.Text, "/secret ")
 
-	if strings.HasPrefix(u.Message.Text, "/secret") {
-		http.PostForm(
-			telegramApi,
-			url.Values{
-				"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
-				"text":    {"Ok2"},
-			})
+		telegram.Reply(os.Getenv("TELEGRAM_API_KEY"), update.Message.Chat.Id, code)
+		/*
+			http.PostForm(
+				telegramApi,
+				url.Values{
+					"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
+					"text":    {"Ok2"},
+				})
+		*/
 	}
 
 	return response, nil
