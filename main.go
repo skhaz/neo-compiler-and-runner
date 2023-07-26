@@ -3,11 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
-	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -46,19 +42,20 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	fmt.Printf("Chat ID3: %d\n", u.Message.Chat.Id)
 
-	x, err := http.PostForm(
-		telegramApi,
-		url.Values{
-			"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
-			"text":    {"Ok!"},
-		})
+	/*
+		x, err := http.PostForm(
+			telegramApi,
+			url.Values{
+				"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
+				"text":    {"Ok!"},
+			})
 
-	fmt.Printf("Response %v\n", response)
-	body, err := io.ReadAll(x.Body)
+		fmt.Printf("Response %v\n", response)
+		body, err := io.ReadAll(x.Body)
 
-	fmt.Printf("Response Body %s\n", string(body[:]))
-	fmt.Printf("Error %v\n", err)
-
+		fmt.Printf("Response Body %s\n", string(body[:]))
+		fmt.Printf("Error %v\n", err)
+	*/
 	return response, nil
 }
 
