@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -43,7 +44,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return response, err
 	}
 
-	if u.Message.Text == "/secret" {
+	if strings.HasPrefix(u.Message.Text, "/secret") {
 		http.PostForm(
 			telegramApi,
 			url.Values{
