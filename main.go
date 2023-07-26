@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	prefix = "/secret"
+	prefix = "/run"
 )
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
