@@ -14,7 +14,7 @@ func Parse(body string) Update {
 	return update
 }
 
-func Reply(token string, id int, text string) error {
+func Reply(token string, id int, text string) {
 	var endpoint string = "https://api.telegram.org/bot" + token + "/sendMessage"
 
 	http.PostForm(
