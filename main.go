@@ -1,6 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"strconv"
+
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -22,7 +28,16 @@ type Response struct {
 	Ok bool `json:"ok"`
 }
 
+var telegramApi = fmt.Sprintf("https://api.telegram.org/bot/%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
+
 func Handler(update Update) (Response, error) {
+
+	http.PostForm(
+		telegramApi,
+		url.Values{
+			"chat_id": {strconv.Itoa(update.Message.Chat.Id)},
+			"text":    {"Ok!"},
+		})
 
 	return Response{Ok: true}, nil
 	/*
