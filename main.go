@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -18,6 +19,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	if strings.HasPrefix(update.Message.Text, "/secret") {
 		code := strings.Trim(update.Message.Text, "/secret ")
+
+		fmt.Printf("Code %s\n", code)
 
 		telegram.Reply(os.Getenv("TELEGRAM_API_KEY"), update.Message.Chat.Id, code)
 		/*
