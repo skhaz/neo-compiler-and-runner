@@ -44,7 +44,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return response, err
 	}
 
-	fmt.Printf("u.Message.Text: %s", u.Message.Text)
+	fmt.Printf("u.Message.Text2: %s", u.Message.Text)
 
 	if strings.HasPrefix(u.Message.Text, "/secret") {
 		http.PostForm(
