@@ -2,6 +2,8 @@ package telegram
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -17,12 +19,15 @@ func Parse(body string) Update {
 func Reply(token string, id int, text string) error {
 	endpoint := "https://api.telegram.org/bot" + token + "/sendMessage"
 
-	_, err := http.PostForm(
+	response, err := http.PostForm(
 		endpoint,
 		url.Values{
 			"chat_id": {strconv.Itoa(id)},
 			"text":    {text},
 		})
+
+	r, err := io.ReadAll(response.Body)
+	fmt.Printf("Response %s\n", string(r[:]))
 
 	return err
 }
