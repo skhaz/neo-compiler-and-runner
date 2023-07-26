@@ -40,7 +40,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return response, err
 	}
 
-	fmt.Printf("Chat ID2: %d\n", v.GetUint64("message", "chat", "id"))
+	fmt.Printf("Chat ID2: %s\n", string(v.GetStringBytes("update", "message", "chat", "id")[:]))
 
 	/*
 		response, err := http.PostForm(
