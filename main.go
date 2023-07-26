@@ -1,36 +1,45 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"skhaz.dev/compliquer/pkg/openai"
 	"skhaz.dev/compliquer/pkg/telegram"
+)
+
+const (
+	prefix = "/secret"
 )
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
-		// openai   = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+		h        = openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 		update   = telegram.Parse(request.Body)
 		response = events.APIGatewayProxyResponse{StatusCode: 200}
 	)
 
-	if strings.HasPrefix(update.Message.Text, "/secret") {
-		code := strings.Trim(update.Message.Text, "/secret ")
+	if strings.HasPrefix(update.Message.Text, prefix) {
+		request := &openai.Request{
+			Model: openai.ModelGpt35Turbo,
+			Messages: []*openai.Message{
+				{Role: openai.RoleSystem, Content: "You are a compiler assistant who compiles or interpret code."},
+				{Role: openai.RoleSystem, Content: "What is the output of the following code?"},
+				{Role: openai.RoleUser, Content: strings.Trim(update.Message.Text, prefix)},
+			}}
 
-		fmt.Printf("Code %s\n", code)
+		r, err := h.Do(request)
+		if err != nil {
+			return response, err
+		}
 
-		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, code)
-		/*
-			http.PostForm(
-				telegramApi,
-				url.Values{
-					"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
-					"text":    {"Ok2"},
-				})
-		*/
+		if r.Error != nil {
+			return response, err
+		}
+
+		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, response.Choices[0].Message.Content)
 	}
 
 	return response, nil
