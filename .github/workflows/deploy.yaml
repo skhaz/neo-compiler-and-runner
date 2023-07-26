@@ -30,16 +30,16 @@ jobs:
           go mod vendor
           go build -ldflags="-s -w" -o main main.go
         env:
-          GOARCH: arm64
+          GOARCH: amd64
           GOOS: linux
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Serverless Framework
-        run: npm install -g serverless serverless-python-requirements
+        run: npm install -g serverless
 
       - name: Deploy
         run: serverless deploy --verbose
