@@ -42,7 +42,7 @@ func Handler(update Update) (Response, error) {
 	fmt.Printf("Response %v\n", response)
 	body, err := io.ReadAll(response.Body)
 
-	fmt.Printf("Response Body %v\n", body)
+	fmt.Printf("Response Body %s\n", string(body[:]))
 	fmt.Printf("Error %v\n", err)
 
 	return Response{Ok: true}, nil
