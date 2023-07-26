@@ -32,6 +32,8 @@ type Response struct {
 var telegramApi = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
 
 func Handler(update Update) (Response, error) {
+	fmt.Printf("Chat ID: %d\n", update.Message.Chat.Id)
+
 	response, err := http.PostForm(
 		telegramApi,
 		url.Values{
