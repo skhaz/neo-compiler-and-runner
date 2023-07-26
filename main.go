@@ -39,6 +39,7 @@ func Handler(update Update) (Response, error) {
 		})
 
 	fmt.Printf("Response %v\n", response)
+	fmt.Printf("Response Body %v\n", response.Body)
 	fmt.Printf("Error %v\n", err)
 
 	return Response{Ok: true}, nil
