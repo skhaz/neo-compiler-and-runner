@@ -27,26 +27,22 @@ type Update struct {
 	Message  Message `json:"message"`
 }
 
-type Response struct {
-	Ok bool `json:"ok"`
-}
-
 var telegramApi = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", os.Getenv("TELEGRAM_BOT_TOKEN"))
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var (
 		u        Update
-		response events.APIGatewayProxyResponse
+		response = events.APIGatewayProxyResponse{StatusCode: 200}
 	)
 
-	fmt.Printf("request.Body: %s", request.Body)
+	fmt.Printf("request.Body 1: %s", request.Body)
 
 	err := json.Unmarshal([]byte(request.Body), &u)
 	if err != nil {
 		return response, err
 	}
 
-	fmt.Printf("u.Message.Text3: %s", u.Message.Text)
+	fmt.Printf("u.Message.Text4: %s", u.Message.Text)
 
 	if strings.HasPrefix(u.Message.Text, "/secret") {
 		http.PostForm(
