@@ -29,11 +29,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			}}
 
 		response, err := h.Do(request)
-		if err != nil {
-			return events.APIGatewayProxyResponse{StatusCode: 500}, err
-		}
-
-		if response.Error != nil {
+		if err != nil || response.Error != nil {
 			return events.APIGatewayProxyResponse{StatusCode: 500}, err
 		}
 
