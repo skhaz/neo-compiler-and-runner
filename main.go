@@ -22,7 +22,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 		fmt.Printf("Code %s\n", code)
 
-		telegram.Reply(os.Getenv("TELEGRAM_API_KEY"), update.Message.Chat.Id, code)
+		telegram.Reply(os.Getenv("TELEGRAM_BOT_TOKEN"), update.Message.Chat.Id, code)
 		/*
 			http.PostForm(
 				telegramApi,
