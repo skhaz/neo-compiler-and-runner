@@ -49,7 +49,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			telegramApi,
 			url.Values{
 				"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
-				"text":    {"Ok!"},
+				"text":    {"Ok1"},
 			})
 	}
 
