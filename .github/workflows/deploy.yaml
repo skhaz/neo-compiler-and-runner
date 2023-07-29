@@ -28,7 +28,7 @@ jobs:
           go get -u -t -d -v ./...
           go mod tidy
           go mod vendor
-          go build -tags lambda.norpc -o main main.go
+          go build -tags lambda.norpc -o bootstrap main.go
         env:
           GOARCH: amd64
           GOOS: linux

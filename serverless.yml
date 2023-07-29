@@ -11,7 +11,7 @@ provider:
 
 functions:
   telegram:
-    handler: main
+    handler: bootstrap
     environment:
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
       TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
