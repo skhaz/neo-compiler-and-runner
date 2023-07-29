@@ -28,11 +28,11 @@ jobs:
           go get -u -t -d -v ./...
           go mod tidy
           go mod vendor
-          go build -ldflags="-s -w" -o bin/main main.go
+          go build -tags lambda.norpc -o main main.go
         env:
           GOARCH: amd64
           GOOS: linux
-          CGO_ENABLED: 0
+          # CGO_ENABLED: 0
 
       - name: Use Node.js
         uses: actions/setup-node@v3

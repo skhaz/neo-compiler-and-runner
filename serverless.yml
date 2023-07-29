@@ -6,11 +6,12 @@ configValidationMode: error
 
 provider:
   name: aws
-  runtime: go1.x
+  runtime: provided.al2
+  architecture: arm64
 
 functions:
   telegram:
-    handler: bin/main
+    handler: main
     environment:
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
       TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
