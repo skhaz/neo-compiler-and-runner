@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,7 +16,7 @@ func Parse(body string) Update {
 }
 
 func Reply(token string, id int, text string) {
-	var endpoint string = "https://api.telegram.org/bot" + token + "/sendMessage"
+	var endpoint string = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
 
 	http.PostForm(
 		endpoint,
