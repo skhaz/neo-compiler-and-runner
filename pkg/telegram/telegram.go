@@ -18,10 +18,5 @@ func Parse(body string) Update {
 func Reply(token string, id int, text string) {
 	var endpoint string = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
 
-	http.PostForm(
-		endpoint,
-		url.Values{
-			"chat_id": {strconv.Itoa(id)},
-			"text":    {text},
-		})
+	http.PostForm(endpoint, url.Values{"chat_id": {strconv.Itoa(id)}, "text": {text}})
 }
