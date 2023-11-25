@@ -69,8 +69,10 @@ jobs:
                         cpu: "1000m"
                         memory: "1Gi"
                     env:
-                      TELEGRAM_TOKEN: "$TELEGRAM_TOKEN"
-                      SECRET: "$SECRET"
+                      - name: TELEGRAM_TOKEN
+                        value: "$TELEGRAM_TOKEN"
+                      - name: SECRET
+                        value: "$SECRET"
           EOF
 
           gcloud run services replace service.yaml
