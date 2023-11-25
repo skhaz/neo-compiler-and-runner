@@ -135,7 +135,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await message.reply_text("Running...")
 
-    result, stdout, stderr = await loop.run_in_executor(None, run, text)
+    try:
+      result, stdout, stderr = await loop.run_in_executor(None, run, text)
+    except Exception as exc:
+        await message.reply_text(f"Error2 {exc}")
+        return
 
     await message.reply_text("Done.")
 
