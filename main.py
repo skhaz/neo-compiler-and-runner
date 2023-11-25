@@ -123,6 +123,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     text = message.text
     if not text:
+        await message.reply_text("not text.")
         return
 
     text = text.lstrip("/run")
@@ -133,7 +134,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     loop = asyncio.get_event_loop()
 
+    await message.reply_text("Running...")
+
     result, stdout, stderr = await loop.run_in_executor(None, run, text)
+
+    await message.reply_text("Done.")
 
     if result:
         await message.reply_text(f"Stdout {stdout}")
