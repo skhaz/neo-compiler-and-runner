@@ -1,0 +1,4 @@
+python-telegram-bot==20.6
+starlette==0.32.0
+uvicorn==0.24.0
+wasmtime==15.0.0

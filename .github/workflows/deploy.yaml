@@ -1,0 +1,80 @@
+name: Deploy on Google Cloud Platform
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate Docker
+        run: gcloud auth configure-docker --quiet ${{ secrets.REGION }}-docker.pkg.dev
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.REGISTRY }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Cloud Run
+        env:
+          SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+          REGION: ${{ secrets.REGION }}
+          REGISTRY: ${{ secrets.REGISTRY }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          cat <<EOF | envsubst > service.yaml
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          metadata:
+            name: "$SERVICE_NAME"
+            labels:
+              cloud.googleapis.com/location: "$REGION"
+          spec:
+            template:
+              metadata:
+                annotations:
+                  run.googleapis.com/execution-environment: "gen2"
+                  run.googleapis.com/startup-cpu-boost: "true"
+                  autoscaling.knative.dev/maxScale: "16"
+              spec:
+                containerConcurrency: "1"
+                timeoutSeconds: "60"
+                containers:
+                  - image: "$REGISTRY/$SERVICE_NAME:$GITHUB_SHA"
+                    name: "play"
+                    resources:
+                      limits:
+                        cpu: "1000m"
+                        memory: "1Gi"
+                    env:
+                      TELEGRAM_TOKEN: "$TELEGRAM_TOKEN"
+                      SECRET: "$SECRET"
+          EOF
+
+          gcloud run services replace service.yaml
+
+      - name: Set Up Webhook
+        run: |
+          curl "https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=$(gcloud run services describe delduca --format 'value(status.url)' --project ${PROJECT_ID})&secret_token=${SECRET}"
