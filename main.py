@@ -129,11 +129,6 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
 
-async def background(payload: Dict[str, Any]):
-    async with application:
-        await application.process_update(Update.de_json(payload, application.bot))
-
-
 async def webhook(request: Request):
     if not equals(
         request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
@@ -143,7 +138,8 @@ async def webhook(request: Request):
 
     payload = await request.json()
 
-    BackgroundTask(background, payload=payload)
+    async with application:
+        await application.process_update(Update.de_json(payload, application.bot))
 
     return Response(status_code=200)
 
