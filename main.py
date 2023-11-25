@@ -36,8 +36,8 @@ def run(source: str) -> str:
         with directory(path):
             with (
                 open("main.cpp", "w+t") as main,
-                open("stdout.txt", "w+t") as stdout,
-                open("stderr.txt", "w+t") as stderr,
+                open("output.txt", "w+t") as output,
+                # open("stderr.txt", "w+t") as stderr,
             ):
                 main.write(source)
                 main.flush()
@@ -62,8 +62,8 @@ def run(source: str) -> str:
 
                 with open("a.out.wasm", "rb") as binary:
                     wasi = WasiConfig()
-                    wasi.stdout_file = "stdout.txt"
-                    wasi.stderr_file = "stderr.txt"
+                    wasi.stdout_file = "output.txt"
+                    wasi.stderr_file = "output.txt"
 
                     engine = Engine()
                     store = Store(engine)
@@ -81,9 +81,8 @@ def run(source: str) -> str:
                         if e.code != 0:
                             raise Exception("exit code is not 0")
 
-                    stdout.seek(0)
-                    stderr.seek(0)
-                    return f"stdout: {stdout.read()}\nstderr: {stderr.read()}"
+                    output.seek(0)
+                    return output.read()
 
 
 def equals(left: str | None, right: str | None) -> bool:
