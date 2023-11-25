@@ -34,10 +34,7 @@ def directory(path):
 def run(source: str) -> str:
     with TemporaryDirectory() as path:
         with directory(path):
-            with (
-                open("main.cpp", "w+t") as main,
-                open("output.txt", "w+t") as output,
-            ):
+            with open("main.cpp", "w+t") as main:
                 main.write(source)
                 main.flush()
 
@@ -59,29 +56,41 @@ def run(source: str) -> str:
                 if result.returncode != 0:
                     raise Exception(result.stderr)
 
-                with open("a.out.wasm", "rb") as binary:
-                    wasi = WasiConfig()
-                    wasi.stdout_file = "output.txt"
-                    wasi.stderr_file = "output.txt"
+                command = [
+                    "node",
+                    "a.out.js",
+                ]
 
-                    engine = Engine()
-                    store = Store(engine)
-                    store.set_wasi(wasi)
-                    linker = Linker(engine)
-                    linker.define_wasi()
-                    module = Module(store.engine, binary.read())
-                    instance = linker.instantiate(store, module)
-                    start = instance.exports(store)["_start"]
-                    assert isinstance(start, Func)
+                result = subprocess.run(command, capture_output=True, text=True)
 
-                    try:
-                        start(store)
-                    except ExitTrap as e:
-                        if e.code != 0:
-                            raise Exception("exit code is not 0")
+                if result.returncode != 0:
+                    raise Exception(result.stderr)
+                
+                return result.stdout
 
-                    output.seek(0)
-                    return output.read()
+                # with open("a.out.wasm", "rb") as binary:
+                #     wasi = WasiConfig()
+                #     wasi.stdout_file = "output.txt"
+                #     wasi.stderr_file = "output.txt"
+
+                #     engine = Engine()
+                #     store = Store(engine)
+                #     store.set_wasi(wasi)
+                #     linker = Linker(engine)
+                #     linker.define_wasi()
+                #     module = Module(store.engine, binary.read())
+                #     instance = linker.instantiate(store, module)
+                #     start = instance.exports(store)["_start"]
+                #     assert isinstance(start, Func)
+
+                #     try:
+                #         start(store)
+                #     except ExitTrap as e:
+                #         if e.code != 0:
+                #             raise Exception("exit code is not 0")
+
+                #     output.seek(0)
+                #     return output.read()
 
 
 def equals(left: str | None, right: str | None) -> bool:
