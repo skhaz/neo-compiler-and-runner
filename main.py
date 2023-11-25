@@ -86,7 +86,7 @@ def run(source: str) -> Tuple[bool, str, str]:
             return execute(binary)
 
 
-def equals(left: str, right: str) -> bool:
+def equals(left: str | None, right: str | None) -> bool:
     if not left or not right:
         return False
 
@@ -105,7 +105,9 @@ async def webhook(request: Request):
         request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
         os.environ["SECRET"],
     ):
-        print(">>> Unauthorized", request.headers.get("X-Telegram-Bot-Api-Secret-Token"))
+        print(
+            ">>> Unauthorized", request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+        )
         return Response(content="Unauthorized", status_code=401)
 
     payload = await request.json()
@@ -121,13 +123,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not message:
         return
 
-    message.reply_text("Leaderboard") 
+    await message.reply_text("Leaderboard")
+
 
 application = (
-    Application.builder()
-    .token(os.environ["TELEGRAM_TOKEN"])
-    .updater(None)
-    .build()
+    Application.builder().token(os.environ["TELEGRAM_TOKEN"]).updater(None).build()
 )
 
 application.add_handler(CommandHandler("run", on_run))
@@ -135,6 +135,6 @@ application.add_handler(CommandHandler("run", on_run))
 app = Starlette(
     debug=True,
     routes=[
-        Route("/", webhook),
+        Route("/", webhook, methods=["POST"]),
     ],
 )
