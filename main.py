@@ -3,8 +3,11 @@ import os
 import subprocess
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
+from typing import Any
+from typing import Dict
 
 from starlette.applications import Starlette
+from starlette.background import BackgroundTask
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
@@ -12,13 +15,6 @@ from telegram import Update
 from telegram.ext import Application
 from telegram.ext import CommandHandler
 from telegram.ext import ContextTypes
-from wasmtime import Engine
-from wasmtime import ExitTrap
-from wasmtime import Func
-from wasmtime import Linker
-from wasmtime import Module
-from wasmtime import Store
-from wasmtime import WasiConfig
 
 
 @contextmanager
@@ -65,7 +61,7 @@ def run(source: str) -> str:
 
                 if result.returncode != 0:
                     raise Exception(result.stderr)
-                
+
                 return result.stdout
 
                 # with open("a.out.wasm", "rb") as binary:
@@ -133,6 +129,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
 
+async def background(payload: Dict[str, Any]):
+    async with application:
+        await application.process_update(Update.de_json(payload, application.bot))
+
+
 async def webhook(request: Request):
     if not equals(
         request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
@@ -142,8 +143,7 @@ async def webhook(request: Request):
 
     payload = await request.json()
 
-    async with application:
-        await application.process_update(Update.de_json(payload, application.bot))
+    BackgroundTask(background, payload=payload)
 
     return Response(status_code=200)
 
