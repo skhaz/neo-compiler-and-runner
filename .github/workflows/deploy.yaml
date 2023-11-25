@@ -57,13 +57,13 @@ jobs:
                 annotations:
                   run.googleapis.com/execution-environment: "gen2"
                   run.googleapis.com/startup-cpu-boost: "true"
-                  autoscaling.knative.dev/maxScale: "16"
+                  autoscaling.knative.dev/maxScale: "1"
               spec:
                 containerConcurrency: "1"
                 timeoutSeconds: "60"
                 containers:
                   - image: "$REGISTRY/$SERVICE_NAME:$GITHUB_SHA"
-                    name: "play"
+                    name: "$SERVICE_NAME"
                     resources:
                       limits:
                         cpu: "1000m"
