@@ -113,7 +113,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = text.lstrip("/run")
 
     if not text:
-        await message.reply_text("Please provide a source code.")
+        await message.reply_text("Luke, I need the code for the Death Star's system.")
         return
 
     loop = asyncio.get_event_loop()
