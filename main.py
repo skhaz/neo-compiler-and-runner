@@ -1,11 +1,10 @@
+import asyncio
 import os
 import subprocess
 from io import BufferedReader
 from tempfile import NamedTemporaryFile
 from tempfile import TemporaryDirectory
 from typing import Tuple
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
 
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -122,7 +121,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not message:
         return
 
-    text = message.text.lstrip("/run")
+    text = message.text
+    if not text:
+        return
+
+    text = text.lstrip("/run")
 
     if not text:
         await message.reply_text("Please provide a source code.")
@@ -139,6 +142,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not result:
         await message.reply_text(f"Stderr {stderr}")
         return
+
 
 application = (
     Application.builder().token(os.environ["TELEGRAM_TOKEN"]).updater(None).build()
