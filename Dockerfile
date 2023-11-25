@@ -21,4 +21,4 @@ COPY . .
 RUN useradd -r user
 USER user
 
-CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
+CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT --workers 8
