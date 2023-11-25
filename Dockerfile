@@ -1,11 +1,11 @@
 FROM python:3.12-slim-bookworm AS base
 
-ENV PATH /opt/venv/bin:$PATH
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV EMSDK=/emsdk
-ENV PATH=/emsdk:/emsdk/upstream/emscripten:/emsdk/node/16.20.0_64bit/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/emsdk:/emsdk/upstream/emscripten:/opt/venv/bin:$PATH
+# :/emsdk/node/16.20.0_64bit/bin
 
 FROM base AS builder
 RUN python -m venv /opt/venv
