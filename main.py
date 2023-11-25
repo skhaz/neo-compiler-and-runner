@@ -105,6 +105,7 @@ async def webhook(request: Request):
         request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
         os.environ["SECRET"],
     ):
+        print(">>> Unauthorized", request.headers.get("X-Telegram-Bot-Api-Secret-Token"))
         return Response(content="Unauthorized", status_code=401)
 
     payload = await request.json()
@@ -121,8 +122,6 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     message.reply_text("Leaderboard") 
-
-print(">>> TELEGRAM_TOKEN", os.environ["TELEGRAM_TOKEN"])
 
 application = (
     Application.builder()
