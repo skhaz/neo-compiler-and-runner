@@ -81,8 +81,8 @@ jobs:
 
       - name: Set Up Webhook
         env:
-          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           SECRET: ${{ secrets.SECRET }}
         run: |
-          curl "https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=$(gcloud run services describe delduca --format 'value(status.url)' --project ${PROJECT_ID})&secret_token=${SECRET}"
+          curl "https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=$(gcloud run services describe delduca --format 'value(status.url)' --project ${GCP_PROJECT_ID})&secret_token=${SECRET}"
