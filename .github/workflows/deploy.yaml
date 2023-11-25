@@ -68,8 +68,8 @@ jobs:
                     name: "$SERVICE_NAME"
                     resources:
                       limits:
-                        cpu: "4000m"
-                        memory: "4Gi"
+                        cpu: "1000m"
+                        memory: "1Gi"
                     env:
                       - name: TELEGRAM_TOKEN
                         value: "$TELEGRAM_TOKEN"
