@@ -130,7 +130,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if result:
         await message.reply_text(stdout)
+        return
 
+    if not result:
+        await message.reply_text(stderr)
+        return
 
 application = (
     Application.builder().token(os.environ["TELEGRAM_TOKEN"]).updater(None).build()
