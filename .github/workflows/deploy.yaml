@@ -62,7 +62,7 @@ jobs:
                   autoscaling.knative.dev/maxScale: "32"
               spec:
                 containerConcurrency: "8"
-                timeoutSeconds: "240"
+                timeoutSeconds: "600"
                 containers:
                   - image: "$REGISTRY/$SERVICE_NAME:$GITHUB_SHA"
                     name: "$SERVICE_NAME"
