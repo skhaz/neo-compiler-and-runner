@@ -43,7 +43,7 @@ def compile(source: str) -> Tuple[bool, str, str]:
 
         result = subprocess.run(command, capture_output=True, text=True)
 
-        return result.returncode == 0, result.stdout, result.stderr
+        return result.returncode == 0, result.stdout, f"compile error {result.stderr}"
 
 
 def execute(binary: BufferedReader) -> Tuple[bool, str, str]:
@@ -65,11 +65,10 @@ def execute(binary: BufferedReader) -> Tuple[bool, str, str]:
 
             try:
                 start(store)
-            except ExitTrap as e:
-                if e.code != 0:
-                    stdout.seek(0)
-                    stderr.seek(0)
-                    return False, stdout.read(), stderr.read()
+            except Exception as exc:
+                stdout.seek(0)
+                stderr.seek(0)
+                return False, stdout.read(), f"{exc}: {stderr.read()}"
             stdout.seek(0)
             stderr.seek(0)
             return False, stdout.read(), stderr.read()
