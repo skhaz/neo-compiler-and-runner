@@ -4,6 +4,8 @@ ENV PATH /opt/venv/bin:$PATH
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
+ENV EMSDK=/emsdk
+ENV PATH=/emsdk:/emsdk/upstream/emscripten:/emsdk/node/16.20.0_64bit/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 FROM base AS builder
 RUN python -m venv /opt/venv
@@ -12,6 +14,7 @@ RUN pip install --no-cache-dir --requirement requirements.txt
 
 FROM base
 WORKDIR /opt/app
+COPY --from=emscripten/emsdk:3.1.49 /emsdk /emsdk
 COPY --from=builder /opt/venv /opt/venv
 COPY . .
 
