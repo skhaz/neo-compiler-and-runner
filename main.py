@@ -1,10 +1,8 @@
 import asyncio
 import os
 import subprocess
-from io import BufferedReader
-from tempfile import NamedTemporaryFile
+from contextlib import contextmanager
 from tempfile import TemporaryDirectory
-from typing import Tuple
 
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -23,67 +21,69 @@ from wasmtime import Store
 from wasmtime import WasiConfig
 
 
-def compile(source: str) -> Tuple[bool, str, str]:
-    with open("main.cpp", "w+t") as fh:
-        fh.write(source)
-        fh.flush()
-
-        command = [
-            "emcc",
-            "-O3",
-            "-flto",
-            "-s",
-            "ENVIRONMENT=node",
-            "-s",
-            "PURE_WASI=1",
-            "-s",
-            "WASM=1",
-            "main.cpp",
-        ]
-
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        return result.returncode == 0, result.stdout, f"compile error {result.stderr}"
-
-
-def execute(binary: BufferedReader) -> Tuple[bool, str, str]:
-    with NamedTemporaryFile(mode="w+t", delete=False) as stdout:
-        with NamedTemporaryFile(mode="w+t", delete=False) as stderr:
-            wasi = WasiConfig()
-            wasi.stdout_file = stdout.name
-            wasi.stderr_file = stderr.name
-
-            engine = Engine()
-            store = Store(engine)
-            store.set_wasi(wasi)
-            linker = Linker(engine)
-            linker.define_wasi()
-            module = Module(store.engine, binary.read())
-            instance = linker.instantiate(store, module)
-            start = instance.exports(store)["_start"]
-            assert isinstance(start, Func)
-
-            try:
-                start(store)
-            except Exception as exc:
-                stdout.seek(0)
-                stderr.seek(0)
-                return False, stdout.read(), f"{exc}: {stderr.read()}"
-            stdout.seek(0)
-            stderr.seek(0)
-            return False, stdout.read(), stderr.read()
-
-
-def run(source: str) -> Tuple[bool, str, str]:
-    with TemporaryDirectory() as path:
+@contextmanager
+def directory(path):
+    original_dir = os.getcwd()
+    try:
         os.chdir(path)
+        yield
+    finally:
+        os.chdir(original_dir)
 
-        result, stdout, stderr = compile(source)
-        if not result:
-            return result, stdout, stderr
 
-        with open("a.out.wasm", "rb") as binary:
-            return execute(binary)
+def run(source: str) -> str:
+    with TemporaryDirectory() as path:
+        with directory(path):
+            with (
+                open("main.cpp", "w+t") as main,
+                open("stdout.txt", "w+t") as stdout,
+                open("stderr.txt", "w+t") as stderr,
+            ):
+                main.write(source)
+                main.flush()
+
+                command = [
+                    "emcc",
+                    "-O3",
+                    "-flto",
+                    "-s",
+                    "ENVIRONMENT=node",
+                    "-s",
+                    "PURE_WASI=1",
+                    "-s",
+                    "WASM=1",
+                    "main.cpp",
+                ]
+
+                result = subprocess.run(command, capture_output=True, text=True)
+
+                if result.returncode != 0:
+                    raise Exception(result.stderr)
+
+                with open("a.out.wasm", "rb") as binary:
+                    wasi = WasiConfig()
+                    wasi.stdout_file = "stdout.txt"
+                    wasi.stderr_file = "stderr.txt"
+
+                    engine = Engine()
+                    store = Store(engine)
+                    store.set_wasi(wasi)
+                    linker = Linker(engine)
+                    linker.define_wasi()
+                    module = Module(store.engine, binary.read())
+                    instance = linker.instantiate(store, module)
+                    start = instance.exports(store)["_start"]
+                    assert isinstance(start, Func)
+
+                    try:
+                        start(store)
+                    except ExitTrap as e:
+                        if e.code != 0:
+                            raise Exception("exit code is not 0")
+
+                    stdout.seek(0)
+                    stderr.seek(0)
+                    return f"stdout: {stdout.read()}\nstderr: {stderr.read()}"
 
 
 def equals(left: str | None, right: str | None) -> bool:
@@ -98,21 +98,6 @@ def equals(left: str | None, right: str | None) -> bool:
             return False
 
     return True
-
-
-async def webhook(request: Request):
-    if not equals(
-        request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
-        os.environ["SECRET"],
-    ):
-        return Response(content="Unauthorized", status_code=401)
-
-    payload = await request.json()
-
-    async with application:
-        await application.process_update(Update.de_json(payload, application.bot))
-
-    return Response(status_code=200)
 
 
 async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -133,23 +118,27 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     loop = asyncio.get_event_loop()
 
-    await message.reply_text("Running...")
-
     try:
-      result, stdout, stderr = await loop.run_in_executor(None, run, text)
+        result = await loop.run_in_executor(None, run, text)
+        await message.reply_text(result)
     except Exception as exc:
-        await message.reply_text(f"Error2 {exc}")
+        await message.reply_text(f"{exc}")
         return
 
-    await message.reply_text("Done.")
 
-    if result:
-        await message.reply_text(f"Stdout {stdout}")
-        return
+async def webhook(request: Request):
+    if not equals(
+        request.headers.get("X-Telegram-Bot-Api-Secret-Token"),
+        os.environ["SECRET"],
+    ):
+        return Response(content="Unauthorized", status_code=401)
 
-    if not result:
-        await message.reply_text(f"Stderr {stderr}")
-        return
+    payload = await request.json()
+
+    async with application:
+        await application.process_update(Update.de_json(payload, application.bot))
+
+    return Response(status_code=200)
 
 
 application = (
