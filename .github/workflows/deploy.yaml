@@ -59,6 +59,7 @@ jobs:
                 annotations:
                   run.googleapis.com/execution-environment: "gen2"
                   run.googleapis.com/startup-cpu-boost: "true"
+                  run.googleapis.com/cpu-throttling: "false"
                   autoscaling.knative.dev/maxScale: "32"
               spec:
                 containerConcurrency: "8"
