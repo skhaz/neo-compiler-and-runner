@@ -4,6 +4,8 @@ from io import BufferedReader
 from tempfile import NamedTemporaryFile
 from tempfile import TemporaryDirectory
 from typing import Tuple
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -78,7 +80,7 @@ def run(source: str) -> Tuple[bool, str, str]:
     with TemporaryDirectory() as path:
         os.chdir(path)
 
-        [result, stdout, stderr] = compile(source)
+        result, stdout, stderr = compile(source)
         if not result:
             return result, stdout, stderr
 
@@ -126,7 +128,9 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await message.reply_text("Please provide a source code.")
         return
 
-    result, stdout, stderr = run(text)
+    loop = asyncio.get_event_loop()
+
+    result, stdout, stderr = await loop.run_in_executor(None, run, text)
 
     if result:
         await message.reply_text(f"Stdout {stdout}")
