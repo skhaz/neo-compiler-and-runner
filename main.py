@@ -129,11 +129,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result, stdout, stderr = run(text)
 
     if result:
-        await message.reply_text(stdout)
+        await message.reply_text(f"Stdout {stdout}")
         return
 
     if not result:
-        await message.reply_text(stderr)
+        await message.reply_text(f"Stderr {stderr}")
         return
 
 application = (
