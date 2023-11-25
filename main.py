@@ -122,9 +122,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     message.reply_text("Leaderboard") 
 
+print(">>> TELEGRAM_TOKEN", os.environ["TELEGRAM_TOKEN"])
+
 application = (
     Application.builder()
-    .token(os.environ.get("TELEGRAM_TOKEN", ""))
+    .token(os.environ["TELEGRAM_TOKEN"])
     .updater(None)
     .build()
 )
