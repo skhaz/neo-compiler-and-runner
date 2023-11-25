@@ -20,4 +20,4 @@ COPY . .
 RUN useradd -r user
 USER user
 
-CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT --workers 8 --timeout-keep-alive 600
+CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT --workers 8 --timeout-keep-alive 600 --timeout-graceful-shutdown 600
