@@ -37,7 +37,6 @@ def run(source: str) -> str:
             with (
                 open("main.cpp", "w+t") as main,
                 open("output.txt", "w+t") as output,
-                # open("stderr.txt", "w+t") as stderr,
             ):
                 main.write(source)
                 main.flush()
