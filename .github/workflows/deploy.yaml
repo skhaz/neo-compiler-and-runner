@@ -37,12 +37,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and Push PubSub Service
+      - name: Build and Push CompileNRun Service
         uses: docker/build-push-action@v5
         with:
-          context: src/pubsub
+          context: src/compilenrun
           push: true
-          tags: ${{ secrets.REGISTRY }}/${{ secrets.PUBSUB_SERVICE_NAME }}:${{ github.sha }}
+          tags: ${{ secrets.REGISTRY }}/${{ secrets.COMPILENRUN_SERVICE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -93,9 +93,9 @@ jobs:
           gcloud run services replace service.yaml
           rm -f service.yaml
 
-      - name: Deploy PubSub Service to Cloud Run
+      - name: Deploy CompileNRun Service to Cloud Run
         env:
-          PUBSUB_SERVICE_NAME: ${{ secrets.PUBSUB_SERVICE_NAME }}
+          COMPILENRUN_SERVICE_NAME: ${{ secrets.COMPILENRUN_SERVICE_NAME }}
           REGION: ${{ secrets.REGION }}
           REGISTRY: ${{ secrets.REGISTRY }}
           GITHUB_SHA: ${{ github.sha }}
@@ -106,7 +106,7 @@ jobs:
           apiVersion: serving.knative.dev/v1
           kind: Service
           metadata:
-            name: "$PUBSUB_SERVICE_NAME"
+            name: "$COMPILENRUN_SERVICE_NAME"
             labels:
               cloud.googleapis.com/location: "$REGION"
           spec:
@@ -121,8 +121,8 @@ jobs:
                 containerConcurrency: "80"
                 timeoutSeconds: "60"
                 containers:
-                  - image: "$REGISTRY/$PUBSUB_SERVICE_NAME:$GITHUB_SHA"
-                    name: "$PUBSUB_SERVICE_NAME"
+                  - image: "$REGISTRY/$COMPILENRUN_SERVICE_NAME:$GITHUB_SHA"
+                    name: "$COMPILENRUN_SERVICE_NAME"
                     resources:
                       limits:
                         cpu: "4000m"
