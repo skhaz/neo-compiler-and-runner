@@ -6,7 +6,10 @@ import os
 import subprocess
 from contextlib import contextmanager
 from http import HTTPStatus
+from subprocess import PIPE
+from subprocess import Popen
 from tempfile import TemporaryDirectory
+from threading import Timer
 
 from flask import Flask
 from flask import Response
@@ -78,8 +81,6 @@ def run(source: str) -> str:
                     "-flto",
                     "-s",
                     "ENVIRONMENT=node",
-                    # "-s",
-                    # "PURE_WASI=1",
                     "-s",
                     "WASM=1",
                     "main.cpp",
@@ -95,12 +96,20 @@ def run(source: str) -> str:
                     "a.out.js",
                 ]
 
-                result = subprocess.run(command, capture_output=True, text=True)
+                # result = subprocess.run(command, capture_output=True, text=True)
 
-                if result.returncode != 0:
-                    raise Exception(result.stderr)
+                # if result.returncode != 0:
+                #     raise Exception(result.stderr)
 
-                return result.stdout
+                # return result.stdout
+                proc = Popen(command, stdout=PIPE, stderr=PIPE)
+                timer = Timer(30, proc.kill)
+                try:
+                    timer.start()
+                    stdout, stderr = proc.communicate()
+                    return stdout
+                finally:
+                    timer.cancel()
 
 
 @app.post("/")
