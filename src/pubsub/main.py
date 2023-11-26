@@ -24,16 +24,6 @@ storage_client = StorageClient()
 bucket = storage_client.bucket(os.environ["BUCKET"])
 
 
-@contextmanager
-def directory(path):
-    original_dir = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(original_dir)
-
-
 def unenvelop():
     def decorator(func):
         @functools.wraps(func)
@@ -71,39 +61,37 @@ def unenvelop():
 
 def run(source: str) -> str:
     with TemporaryDirectory() as path:
-        with directory(path):
-            with open("main.cpp", "w+t") as main:
-                main.write(source)
-                main.flush()
+        os.chdir(path)
 
-                command = [
-                    "emcc",
-                    "-O3",
-                    "-flto",
-                    "-s",
-                    "ENVIRONMENT=node",
-                    "-s",
-                    "WASM=1",
-                    "main.cpp",
-                ]
+        with open("main.cpp", "w+t") as main:
+            main.write(source)
+            main.flush()
 
-                result = subprocess.run(command, capture_output=True, text=True)
+            command = [
+                "emcc",
+                "-O3",
+                "-flto",
+                "-s",
+                "ENVIRONMENT=node",
+                "-s",
+                "WASM=1",
+                "main.cpp",
+            ]
 
-                if result.returncode != 0:
-                    raise Exception(result.stderr)
+            result = subprocess.run(command, capture_output=True, text=True)
 
-                proc = Popen(["node", "a.out.js"], stdout=PIPE, stderr=PIPE)
-                timer = Timer(10, proc.kill)
-                try:
-                    timer.start()
-                    stdout, stderr = proc.communicate()
-                finally:
-                    timer.cancel()
+            if result.returncode != 0:
+                raise Exception(result.stderr)
 
-                if proc.poll() is not None:
-                    return stdout
-                else:
-                    return "Timeout."
+            proc = Popen(["node", "a.out.js"], stdout=PIPE, stderr=PIPE)
+            timer = Timer(10, proc.kill)
+            try:
+                timer.start()
+                stdout, stderr = proc.communicate()
+            finally:
+                timer.cancel()
+
+            return stdout
 
 
 @app.post("/")
