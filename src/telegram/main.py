@@ -50,12 +50,16 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
 
-    request = PublishRequest(topic=os.environ["TOPIC"], messages=[message])
+    request = PublishRequest(messages=[message])
 
     async def request_generator():
         yield request
 
-    await pubsub.publish(requests=request_generator())
+    async with pubsub:
+        stream = await pubsub.publish(requests=request_generator())
+
+        async for response in stream:
+            print(f"Published message IDs: {response.message_ids}")
 
     await message.reply_text("Ok")
 
