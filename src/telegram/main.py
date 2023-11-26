@@ -1,7 +1,6 @@
 import json
 import os
 
-from google.cloud import PublishRequest
 from google.cloud import pubsublite_v1
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -49,7 +48,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     data = json.dumps(payload).encode("utf-8")
 
-    request = PublishRequest(topic=os.environ["TOPIC"], messages=[{"data": data}])
+    request = pubsublite_v1.PublishRequest(topic=os.environ["TOPIC"], messages=[{"data": data}])
 
     async def request_generator():
         yield request
