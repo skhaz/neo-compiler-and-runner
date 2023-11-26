@@ -11,7 +11,7 @@ from google.cloud.storage import Client as StorageClient
 app = Flask(__name__)
 
 storage_client = StorageClient()
-bucket = storage_client.bucket(os.environ["APP_BUCKET"])
+bucket = storage_client.bucket(os.environ["BUCKET"])
 
 
 def unenvelop():
