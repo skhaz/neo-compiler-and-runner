@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import subprocess
-import traceback
 from contextlib import contextmanager
 from http import HTTPStatus
 from subprocess import PIPE
@@ -29,8 +28,6 @@ def unenvelop():
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             envelope = request.get_json()
-
-            print(">>> envelope", envelope)
 
             if not envelope:
                 message = "no Pub/Sub message received"
@@ -93,7 +90,7 @@ def run(source: str) -> str:
                     timeout=15,
                 )
             except subprocess.TimeoutExpired:
-                return "Timeout"
+                return "⏰😮‍💨"
 
             return result.stdout
 
@@ -104,9 +101,7 @@ def index(data):
     try:
         result = run(data["source"])
 
-        filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
-
-        blob = bucket.blob(filename)
+        blob = bucket.blob(hashlib.sha256(str(data).encode()).hexdigest())
         blob.upload_from_string(result)
         blob.make_public()
         print(blob.public_url)
