@@ -105,7 +105,9 @@ def run(source: str) -> str:
 @app.post("/")
 @unenvelop()
 def index(data):
-    print(">>> data", data)
+    if "source" not in data:
+        abort(HTTPStatus.NO_CONTENT)
+
     result = run(data["source"])
 
     # if len(result) > 1024:
