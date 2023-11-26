@@ -5,7 +5,6 @@ import json
 import os
 import subprocess
 from http import HTTPStatus
-from subprocess import PIPE
 from tempfile import TemporaryDirectory
 
 from flask import Flask
@@ -66,27 +65,33 @@ def run(source: str) -> str:
             main.write(source)
             main.flush()
 
-            command = [
-                "emcc",
-                "-O3",
-                "-flto",
-                "-s",
-                "ENVIRONMENT=node",
-                "-s",
-                "WASM=1",
-                "main.cpp",
-            ]
-
-            result = subprocess.run(command, capture_output=True, text=True)
-
-            if result.returncode != 0:
-                raise Exception(result.stderr)
-
             try:
                 result = subprocess.run(
-                    ["node", "a.out.js"],
-                    stdout=PIPE,
-                    stderr=PIPE,
+                    [
+                        "emcc",
+                        "-O3",
+                        "-flto",
+                        "-s",
+                        "ENVIRONMENT=node",
+                        "-s",
+                        "WASM=1",
+                        "main.cpp",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                )
+
+                if result.returncode != 0:
+                    return result.stderr
+
+                result = subprocess.run(
+                    [
+                        "node",
+                        "a.out.js",
+                    ],
+                    capture_output=True,
+                    text=True,
                     timeout=15,
                 )
             except subprocess.TimeoutExpired:
@@ -101,7 +106,7 @@ def index(data):
     try:
         result = run(data["source"])
 
-        if len(result) > 256:
+        if len(result) > 128:
             blob = bucket.blob(hashlib.sha256(str(data).encode()).hexdigest())
             blob.upload_from_string(result)
             blob.make_public()
