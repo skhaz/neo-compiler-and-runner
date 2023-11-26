@@ -66,7 +66,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await message.reply_text("Ok")
 
     except Exception as e:
-        await message.reply_text(f"{e}\n{traceback.print_tb(e.__traceback__)}")
+        await message.reply_text(f"{e}\n{traceback.format_exc()}")
 
     # stream = await pubsub.publish(requests=request_generator())
 
