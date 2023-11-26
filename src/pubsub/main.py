@@ -112,3 +112,4 @@ def index(data):
     blob = bucket.blob(filename)
     blob.upload_from_string(result)
     blob.make_public()
+    print(blob.public_url)
