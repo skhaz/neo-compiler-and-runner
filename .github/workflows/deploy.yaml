@@ -45,6 +45,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           SECRET: ${{ secrets.SECRET }}
+          TOPIC: ${{ secrets.TOPIC }}
         run: |
           cat <<EOF | envsubst > service.yaml
           apiVersion: serving.knative.dev/v1
@@ -76,6 +77,8 @@ jobs:
                         value: "$TELEGRAM_TOKEN"
                       - name: SECRET
                         value: "$SECRET"
+                      - name: TOPIC
+                        value: "$TOPIC"
           EOF
 
           gcloud run services replace service.yaml
