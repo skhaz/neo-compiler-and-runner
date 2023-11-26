@@ -83,11 +83,11 @@ jobs:
 
           gcloud run services replace service.yaml
 
-      - name: Set Up Telegram Webhook
-        env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          TELEGRAM_SERVICE_NAME: ${{ secrets.TELEGRAM_SERVICE_NAME }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          SECRET: ${{ secrets.SECRET }}
-        run: |
-          curl "https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=$(gcloud run services describe ${TELEGRAM_SERVICE_NAME} --format 'value(status.url)' --project ${GCP_PROJECT_ID})&secret_token=${SECRET}"
+      # - name: Set Up Telegram Webhook
+      #   env:
+      #     GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      #     TELEGRAM_SERVICE_NAME: ${{ secrets.TELEGRAM_SERVICE_NAME }}
+      #     TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      #     SECRET: ${{ secrets.SECRET }}
+      #   run: |
+      #     curl "https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=$(gcloud run services describe ${TELEGRAM_SERVICE_NAME} --format 'value(status.url)' --project ${GCP_PROJECT_ID})&secret_token=${SECRET}"

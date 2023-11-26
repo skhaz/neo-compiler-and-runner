@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 from google.cloud.pubsublite_v1.types.publisher import PublishRequest
 from google.cloud.pubsublite_v1.types import PubSubMessage
@@ -65,7 +66,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await message.reply_text("Ok")
 
     except Exception as e:
-        await message.reply_text(str(e))
+        await message.reply_text(traceback.print_tb(e.__traceback__))
 
     # stream = await pubsub.publish(requests=request_generator())
 
