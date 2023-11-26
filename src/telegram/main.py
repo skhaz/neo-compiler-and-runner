@@ -51,7 +51,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
 
-        request = PublishRequest(messages=[message])
+        request = PublishRequest(message)
 
         async def request_generator():
             yield request
