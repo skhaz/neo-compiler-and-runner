@@ -1,7 +1,9 @@
 import json
 import os
 
-from google.cloud import pubsublite_v1
+from google.cloud.pubsublite_v1.types.publisher import PublishRequest
+from google.cloud.pubsublite_v1.types import PubSubMessage
+from google.cloud.pubsublite_v1 import PublisherServiceAsyncClient
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
@@ -16,7 +18,7 @@ application = (
     Application.builder().token(os.environ["TELEGRAM_TOKEN"]).updater(None).build()
 )
 
-pubsub = pubsublite_v1.PublisherServiceAsyncClient()
+pubsub = PublisherServiceAsyncClient()
 
 
 async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -46,9 +48,9 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         }
     }
 
-    data = json.dumps(payload).encode("utf-8")
+    message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
 
-    request = pubsublite_v1.PublishRequest(topic=os.environ["TOPIC"], messages=[{"data": data}])
+    request = PublishRequest(topic=os.environ["TOPIC"], messages=[message])
 
     async def request_generator():
         yield request
