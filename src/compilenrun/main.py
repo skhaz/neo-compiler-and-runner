@@ -107,6 +107,5 @@ def index(data):
         print(blob.public_url)
     except Exception as e:  # noqa
         print(str(e))
-        # print(traceback.format_exc())
 
     return Response(status=200)
