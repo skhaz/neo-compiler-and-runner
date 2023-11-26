@@ -37,7 +37,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and Push Telegram Service
+      - name: Build and Push PubSub Service
         uses: docker/build-push-action@v5
         with:
           context: src/pubsub
