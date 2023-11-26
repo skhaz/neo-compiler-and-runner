@@ -36,32 +36,36 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await message.reply_text("Luke, I need the code for the Death Star's system.")
         return
 
-    payload = {
-        "message": {
-            "chat": {
-                "id": message.chat.id,
-            },
+    try:
+        payload = {
             "message": {
-                "id": message.message_id,
-            },
-            "source": text,
+                "chat": {
+                    "id": message.chat.id,
+                },
+                "message": {
+                    "id": message.message_id,
+                },
+                "source": text,
+            }
         }
-    }
 
-    message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
+        message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
 
-    request = PublishRequest(messages=[message])
+        request = PublishRequest(messages=[message])
 
-    async def request_generator():
-        yield request
+        async def request_generator():
+            yield request
 
-    async with pubsub:
-        stream = await pubsub.publish(requests=request_generator())
+        async with pubsub:
+            stream = await pubsub.publish(requests=request_generator())
 
-        async for response in stream:
-            print(f"Published message IDs: {response.message_ids}")
+            async for response in stream:
+                print(f"Published message IDs: {response.message_ids}")
 
-    await message.reply_text("Ok")
+        await message.reply_text("Ok")
+
+    except Exception as e:
+        await message.reply_text(str(e))
 
     # stream = await pubsub.publish(requests=request_generator())
 
