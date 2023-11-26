@@ -30,6 +30,8 @@ def unenvelop():
         def wrapper(*args, **kwargs):
             envelope = request.get_json()
 
+            print(">>> envelope", envelope)
+
             if not envelope:
                 message = "no Pub/Sub message received"
                 print(message)
