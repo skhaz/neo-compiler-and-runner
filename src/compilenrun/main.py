@@ -114,4 +114,4 @@ def index(data):
         print(str(e))
         # print(traceback.format_exc())
 
-    return Response(status=204)
+    return Response(status=200)
