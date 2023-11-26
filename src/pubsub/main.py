@@ -53,7 +53,7 @@ def unenvelop():
 @unenvelop()
 def index(data):
     print("Received data: ", data)
-    blob = bucket.blob("data.txt")
+    blob = bucket.blob("data2.txt")
     blob.upload_from_string(data)
     blob.make_public()
     print("Uploaded to: ", blob.public_url)
