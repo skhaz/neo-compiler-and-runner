@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import subprocess
+import traceback
 from contextlib import contextmanager
 from http import HTTPStatus
 from subprocess import PIPE
@@ -92,7 +93,7 @@ def run(source: str) -> str:
                     raise Exception(result.stderr)
 
                 proc = Popen(["node", "a.out.js"], stdout=PIPE, stderr=PIPE)
-                timer = Timer(30, proc.kill)
+                timer = Timer(10, proc.kill)
                 try:
                     timer.start()
                     stdout, stderr = proc.communicate()
@@ -111,9 +112,6 @@ def index(data):
     try:
         result = run(data["source"])
 
-        # if len(result) > 1024:
-        #    # upload to storage
-
         filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
 
         blob = bucket.blob(filename)
@@ -121,6 +119,7 @@ def index(data):
         blob.make_public()
         print(blob.public_url)
     except Exception as e:  # noqa
-        print(e)
+        print(str(e))
+        print(traceback.format_exc())
 
     return Response(status=204)
