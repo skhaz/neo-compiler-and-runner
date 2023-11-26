@@ -85,15 +85,17 @@ def run(source: str) -> str:
             if result.returncode != 0:
                 raise Exception(result.stderr)
 
-            proc = Popen(["node", "a.out.js"], stdout=PIPE, stderr=PIPE)
-            timer = Timer(10, proc.kill)
             try:
-                timer.start()
-                stdout, stderr = proc.communicate()
-            finally:
-                timer.cancel()
+                result = subprocess.run(
+                    ["node", "a.out.js"],
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    timeout=15,
+                )
+            except subprocess.TimeoutExpired:
+                return "Timeout"
 
-            return stdout
+            return result.stdout
 
 
 @app.post("/")
@@ -110,6 +112,6 @@ def index(data):
         print(blob.public_url)
     except Exception as e:  # noqa
         print(str(e))
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
 
     return Response(status=204)
