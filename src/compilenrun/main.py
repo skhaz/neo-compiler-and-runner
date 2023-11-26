@@ -4,23 +4,23 @@ import hashlib
 import json
 import os
 import subprocess
-from contextlib import contextmanager
 from http import HTTPStatus
 from subprocess import PIPE
-from subprocess import Popen
 from tempfile import TemporaryDirectory
-from threading import Timer
 
 from flask import Flask
 from flask import Response
 from flask import abort
 from flask import request
 from google.cloud.storage import Client as StorageClient
+from requests import Session
 
 app = Flask(__name__)
 
 storage_client = StorageClient()
 bucket = storage_client.bucket(os.environ["BUCKET"])
+
+requests = Session()
 
 
 def unenvelop():
@@ -101,10 +101,24 @@ def index(data):
     try:
         result = run(data["source"])
 
-        blob = bucket.blob(hashlib.sha256(str(data).encode()).hexdigest())
-        blob.upload_from_string(result)
-        blob.make_public()
-        print(blob.public_url)
+        if len(result) > 256:
+            blob = bucket.blob(hashlib.sha256(str(data).encode()).hexdigest())
+            blob.upload_from_string(result)
+            blob.make_public()
+            result = blob.public_url
+
+        url = f"https://api.telegram.org/bot{os.environ['TELEGRAM_TOKEN']}/sendMessage"
+
+        requests.post(
+            url,
+            json={
+                "chat_id": data["chat_id"],
+                "reply_to_message_id": data["message_id"],
+                "allow_sending_without_reply": True,
+                "text": result,
+            },
+        )
+
     except Exception as e:  # noqa
         print(str(e))
 
