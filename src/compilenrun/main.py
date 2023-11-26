@@ -94,6 +94,9 @@ def run(source: str) -> str:
                     text=True,
                     timeout=15,
                 )
+
+                if result.returncode != 0:
+                    return result.stderr
             except subprocess.TimeoutExpired:
                 return "⏰😮‍💨"
 
