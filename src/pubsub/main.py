@@ -91,25 +91,18 @@ def run(source: str) -> str:
                 if result.returncode != 0:
                     raise Exception(result.stderr)
 
-                command = [
-                    "node",
-                    "a.out.js",
-                ]
-
-                # result = subprocess.run(command, capture_output=True, text=True)
-
-                # if result.returncode != 0:
-                #     raise Exception(result.stderr)
-
-                # return result.stdout
-                proc = Popen(command, stdout=PIPE, stderr=PIPE)
+                proc = Popen(["node", "a.out.js"], stdout=PIPE, stderr=PIPE)
                 timer = Timer(30, proc.kill)
                 try:
                     timer.start()
                     stdout, stderr = proc.communicate()
-                    return stdout
                 finally:
                     timer.cancel()
+
+                if proc.poll() is not None:
+                    return stdout
+                else:
+                    return "Timeout."
 
 
 @app.post("/")
