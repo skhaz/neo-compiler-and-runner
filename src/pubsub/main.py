@@ -1,7 +1,12 @@
 import base64
 import functools
+import hashlib
+import json
 import os
+import subprocess
+from contextlib import contextmanager
 from http import HTTPStatus
+from tempfile import TemporaryDirectory
 
 from flask import Flask
 from flask import abort
@@ -12,6 +17,16 @@ app = Flask(__name__)
 
 storage_client = StorageClient()
 bucket = storage_client.bucket(os.environ["BUCKET"])
+
+
+@contextmanager
+def directory(path):
+    original_dir = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(original_dir)
 
 
 def unenvelop():
@@ -30,30 +45,70 @@ def unenvelop():
                 print(message)
                 abort(HTTPStatus.BAD_REQUEST, description=f"Bad Request: {message}")
 
-            pubsub_message = envelope["message"]
+            message = envelope["message"]
 
             data = None
 
-            if isinstance(pubsub_message, dict) and "data" in pubsub_message:
-                data = base64.b64decode(pubsub_message["data"]).decode("utf-8").strip()
+            if isinstance(message, dict) and "data" in message:
+                data = base64.b64decode(message["data"]).decode("utf-8").strip()
 
             if not data:
                 message = "received an empty message from Pub/Sub"
                 print(message)
                 abort(HTTPStatus.BAD_REQUEST, description=f"Bad Request: {message}")
 
-            return func(data)
+            return func(json.loads(data))
 
         return wrapper
 
     return decorator
 
 
+def run(source: str) -> str:
+    with TemporaryDirectory() as path:
+        with directory(path):
+            with open("main.cpp", "w+t") as main:
+                main.write(source)
+                main.flush()
+
+                command = [
+                    "emcc",
+                    "-O3",
+                    "-flto",
+                    "-s",
+                    "ENVIRONMENT=node",
+                    # "-s",
+                    # "PURE_WASI=1",
+                    "-s",
+                    "WASM=1",
+                    "main.cpp",
+                ]
+
+                result = subprocess.run(command, capture_output=True, text=True)
+
+                if result.returncode != 0:
+                    raise Exception(result.stderr)
+
+                command = [
+                    "node",
+                    "a.out.js",
+                ]
+
+                result = subprocess.run(command, capture_output=True, text=True)
+
+                if result.returncode != 0:
+                    raise Exception(result.stderr)
+
+                return result.stdout
+
+
 @app.post("/")
 @unenvelop()
 def index(data):
-    print("Received data: ", data)
-    blob = bucket.blob("data2.txt")
-    blob.upload_from_string(data)
+    result = run(data["source"])
+
+    filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
+
+    blob = bucket.blob(filename)
+    blob.upload_from_string(result)
     blob.make_public()
-    print("Uploaded to: ", blob.public_url)
