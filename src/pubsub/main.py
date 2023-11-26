@@ -115,19 +115,19 @@ def run(source: str) -> str:
 @app.post("/")
 @unenvelop()
 def index(data):
-    if "source" not in data:
-        abort(HTTPStatus.NO_CONTENT)
+    try:
+        result = run(data["source"])
 
-    result = run(data["source"])
+        # if len(result) > 1024:
+        #    # upload to storage
 
-    # if len(result) > 1024:
-    #    # upload to storage
+        filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
 
-    filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
-
-    blob = bucket.blob(filename)
-    blob.upload_from_string(result)
-    blob.make_public()
-    print(blob.public_url)
+        blob = bucket.blob(filename)
+        blob.upload_from_string(result)
+        blob.make_public()
+        print(blob.public_url)
+    except Exception as e:  # noqa
+        print(e)
 
     return Response(status=204)
