@@ -9,6 +9,7 @@ from http import HTTPStatus
 from tempfile import TemporaryDirectory
 
 from flask import Flask
+from flask import Response
 from flask import abort
 from flask import request
 from google.cloud.storage import Client as StorageClient
@@ -119,3 +120,5 @@ def index(data):
     blob.upload_from_string(result)
     blob.make_public()
     print(blob.public_url)
+
+    return Response(status=204)
