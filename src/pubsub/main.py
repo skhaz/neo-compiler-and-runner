@@ -105,7 +105,11 @@ def run(source: str) -> str:
 @app.post("/")
 @unenvelop()
 def index(data):
+    print(">>> data", data)
     result = run(data["source"])
+
+    # if len(result) > 1024:
+    #    # upload to storage
 
     filename = f"{hashlib.sha256(str(data).encode()).hexdigest()}.txt"
 
