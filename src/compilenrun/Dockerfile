@@ -3,7 +3,7 @@ FROM python:3.12-slim AS base
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV EMSDK=/emsdk
-ENV PATH=/emsdk:/emsdk/upstream/emscripten:/emsdk/node/16.20.0_64bit/bin:/opt/venv/bin:$PATH
+ENV PATH=/emsdk:/emsdk/upstream/emscripten:/opt/venv/bin:$PATH
 
 FROM base AS builder
 RUN python -m venv /opt/venv
