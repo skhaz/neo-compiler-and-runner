@@ -13,6 +13,14 @@ from flask import abort
 from flask import request
 from google.cloud.storage import Client as StorageClient
 from requests import Session
+from wasmtime import Config
+from wasmtime import Engine
+from wasmtime import ExitTrap
+from wasmtime import Func
+from wasmtime import Linker
+from wasmtime import Module
+from wasmtime import Store
+from wasmtime import WasiConfig
 
 app = Flask(__name__)
 
@@ -75,32 +83,54 @@ def run(source: str) -> str:
                         "ENVIRONMENT=node",
                         "-s",
                         "WASM=1",
+                        "-s",
+                        "PURE_WASI=1",
                         "main.cpp",
                     ],
                     capture_output=True,
                     text=True,
+                    check=True,
                     timeout=300,
                 )
 
                 if result.returncode != 0:
                     return result.stderr
 
-                result = subprocess.run(
-                    [
-                        "node",
-                        "a.out.js",
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=15,
-                )
+                with open("a.out.wasm", "rb") as binary:
+                    wasi = WasiConfig()
+                    wasi.stdout_file = "a.out.stdout"
+                    wasi.stderr_file = "a.out.stderr"
 
-                if result.returncode != 0:
-                    return result.stderr
+                    config = Config()
+                    config.consume_fuel = True
+                    engine = Engine(config)
+                    store = Store(engine)
+                    store.set_wasi(wasi)
+                    store.set_limits(16 * 1024 * 1024)
+                    store.set_fuel(10_000_000_000)
+
+                    linker = Linker(engine)
+                    linker.define_wasi()
+                    module = Module(store.engine, binary.read())
+                    instance = linker.instantiate(store, module)
+                    start = instance.exports(store)["_start"]
+                    assert isinstance(start, Func)
+
+                    try:
+                        start(store)
+                    except ExitTrap as e:
+                        if e.code != 0:
+                            with open("a.out.stderr", "rt") as stderr:
+                                return stderr.read()
+
+                    with open("a.out.stdout", "rt") as stdout:
+                        return stdout.read()
             except subprocess.TimeoutExpired:
                 return "⏰😮‍💨"
-
-            return result.stdout
+            except subprocess.CalledProcessError as e:
+                return e.stderr
+            except Exception as e:  # noqa
+                return str(e)
 
 
 @app.post("/")
