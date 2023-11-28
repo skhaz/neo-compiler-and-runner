@@ -76,7 +76,7 @@ def run(source: str) -> str:
             try:
                 result = subprocess.run(
                     [
-                        "emcc",
+                        "em++",
                         "-O3",
                         "-flto",
                         "-s",
