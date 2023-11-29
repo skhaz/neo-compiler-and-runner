@@ -69,7 +69,7 @@ def run(source: str) -> str:
                     engine = Engine(config)
                     store = Store(engine)
                     store.set_wasi(wasi)
-                    store.set_limits(16 * 1024 * 1024)
+                    # store.set_limits(16 * 1024 * 1024)
                     # store.set_fuel(10_000_000_000)
 
                     linker = Linker(engine)
@@ -112,7 +112,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         coro = asyncio.to_thread(run, text)
         try:
-            result = await asyncio.wait_for(coro, timeout=60)
+            result = await asyncio.wait_for(coro, timeout=120)
             await message.reply_text(result)
         except asyncio.TimeoutError:
             await message.reply_text("⏰😮‍💨")
