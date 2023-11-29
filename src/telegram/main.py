@@ -51,11 +51,17 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             }
         }
 
+        print(">>> path", os.environ["PUBSUB_TOPIC_PATH"])
+
+        request = PublishRequest(
+            topic_path=os.environ["PUBSUB_TOPIC_PATH"],
+            messages=[PubSubMessage(data=json.dumps(payload).encode("utf-8"))],
+        )
+
         async def request_generator():
-            yield PublishRequest(
-                topic_path=os.environ["PUBSUB_TOPIC_PATH"],
-                messages=[PubSubMessage(data=json.dumps(payload).encode("utf-8"))],
-            )
+            yield request
+
+        await message.reply_text("Before publish")
 
         await pubsub.publish(requests=request_generator())
 
