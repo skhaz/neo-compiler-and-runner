@@ -95,7 +95,7 @@ def run(source: str) -> str:
 
 
 async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = update.message
+    message = update.message.reply_to_message or update.message
     if not message:
         return
 
@@ -111,8 +111,10 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         coro = asyncio.to_thread(run, text)
+
         result = await asyncio.wait_for(coro, timeout=30)
-        if len(result) > 1:
+
+        if len(result) > 64:
             blob = bucket.blob(hashlib.sha256(str(text).encode()).hexdigest())
             blob.upload_from_string(result)
             blob.make_public()
@@ -121,9 +123,6 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await message.reply_text(result)
     except asyncio.TimeoutError:
         await message.reply_text("⏰😮‍💨")
-        return
-    except Exception as e:
-        await message.reply_text(f"{e}\n{traceback.format_exc()}")
 
 
 def equals(left: str | None, right: str | None) -> bool:
