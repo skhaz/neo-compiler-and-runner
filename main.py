@@ -4,7 +4,6 @@ import subprocess
 import traceback
 from tempfile import TemporaryDirectory
 
-from flask import Response
 from google.cloud.storage import Client as StorageClient
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -73,7 +72,7 @@ def run(source: str) -> str:
                     store = Store(engine)
                     store.set_wasi(wasi)
                     store.set_limits(16 * 1024 * 1024)
-                    store.set_fuel(10_000_000_000)
+                    # store.set_fuel(10_000_000_000)
 
                     linker = Linker(engine)
                     linker.define_wasi()
