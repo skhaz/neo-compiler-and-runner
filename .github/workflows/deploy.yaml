@@ -63,15 +63,15 @@ jobs:
                   run.googleapis.com/cpu-throttling: "true"
                   autoscaling.knative.dev/maxScale: "16"
               spec:
-                containerConcurrency: "8"
-                timeoutSeconds: "3600"
+                containerConcurrency: "1"
+                timeoutSeconds: "60"
                 containers:
                   - image: "$REGISTRY/$TELEGRAM_SERVICE_NAME:$GITHUB_SHA"
                     name: "$TELEGRAM_SERVICE_NAME"
                     resources:
                       limits:
-                        cpu: "8000m"
-                        memory: "8Gi"
+                        cpu: "4000m"
+                        memory: "4Gi"
                     env:
                       - name: TELEGRAM_TOKEN
                         value: "$TELEGRAM_TOKEN"
