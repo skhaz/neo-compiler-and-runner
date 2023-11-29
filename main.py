@@ -105,7 +105,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not text:
         return
 
-    text = text.lstrip("/run")
+    text = text.lstrip("/run2")
 
     if not text:
         await message.reply_text("Luke, I need the code for the Death Star's system.")
