@@ -2,7 +2,6 @@ import json
 import os
 import traceback
 
-from google.cloud.pubsub_v1.types import PublisherOptions
 from google.cloud.pubsublite_v1 import PublisherServiceAsyncClient
 from google.cloud.pubsublite_v1.types import PublishRequest
 from google.cloud.pubsublite_v1.types import PubSubMessage
@@ -52,21 +51,13 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             }
         }
 
-        client_options = PublisherOptions(topic_path=os.environ["PUBSUB_TOPIC_PATH"])
-        pubsub = PublisherServiceAsyncClient(client_options=client_options)
-
-        message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
-
-        request = PublishRequest(messages=[message])
-
         async def request_generator():
-            yield request
+            yield PublishRequest(
+                topic_path=os.environ["PUBSUB_TOPIC_PATH"],
+                messages=[PubSubMessage(data=json.dumps(payload).encode("utf-8"))],
+            )
 
-        try:
-            await pubsub.publish(requests=request_generator())
-        except Exception as e:
-            await message.reply_text(f"{e}\n{traceback.format_exc()}")
-            return
+        await pubsub.publish(requests=request_generator())
 
         await message.reply_text("Ok")
 
