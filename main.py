@@ -113,8 +113,13 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     try:
-        result = await asyncio.to_thread(run, text)
-        await message.reply_text(result)
+        coro = asyncio.to_thread(run, text)
+        try:
+            result = await asyncio.wait_for(coro, timeout=30)
+            await message.reply_text(result)
+        except asyncio.TimeoutError:
+            await message.reply_text("Timeout")
+            return
     except Exception as e:
         await message.reply_text(f"{e}\n{traceback.format_exc()}")
 
