@@ -118,6 +118,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             blob = bucket.blob(hashlib.sha256(str(text).encode()).hexdigest())
             blob.upload_from_string(result)
             blob.make_public()
+
             result = blob.public_url
 
         await message.reply_text(result)
