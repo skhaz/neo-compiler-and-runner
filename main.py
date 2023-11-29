@@ -111,7 +111,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         coro = asyncio.to_thread(run, text)
-        result = await asyncio.wait_for(coro, timeout=120)
+        result = await asyncio.wait_for(coro, timeout=30)
         await message.reply_text(result)
     except asyncio.TimeoutError:
         await message.reply_text("⏰😮‍💨")
