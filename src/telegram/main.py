@@ -9,6 +9,8 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
+from google.cloud.pubsublite_v1 import PublisherServiceAsyncClient, PublisherOptions
+from google.cloud.pubsublite_v1.types import PubSubMessage, PublishRequest
 
 from telegram import Update
 from telegram.ext import Application
@@ -50,28 +52,26 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             }
         }
 
-        request = (
-            PublishRequest()
-        )  # PubSubMessage(data=json.dumps(payload).encode("utf-8")))  # fmt: skip
+        client_options = PublisherOptions(topic_path=os.environ["PUBSUB_TOPIC_PATH"])
+        pubsub = PublisherServiceAsyncClient(client_options=client_options)
+
+        message = PubSubMessage(data=json.dumps(payload).encode("utf-8"))
+
+        request = PublishRequest(messages=[message])
 
         async def request_generator():
             yield request
 
-        async with pubsub:
-            stream = await pubsub.publish(requests=request_generator())
-
-            async for response in stream:
-                print(f"Published message IDs: {response.message_ids}")
+        try:
+            await pubsub.publish(requests=request_generator())
+        except Exception as e:
+            await message.reply_text(f"{e}\n{traceback.format_exc()}")
+            return
 
         await message.reply_text("Ok")
 
     except Exception as e:
         await message.reply_text(f"{e}\n{traceback.format_exc()}")
-
-    # stream = await pubsub.publish(requests=request_generator())
-
-    # async for response in stream:
-    #     print(f"{response.message_ids}")
 
 
 def equals(left: str | None, right: str | None) -> bool:
