@@ -2,15 +2,15 @@ import json
 import os
 import traceback
 
-from google.cloud.pubsublite_v1.types.publisher import PublishRequest
-from google.cloud.pubsublite_v1.types import PubSubMessage
+from google.cloud.pubsub_v1.types import PublisherOptions
 from google.cloud.pubsublite_v1 import PublisherServiceAsyncClient
+from google.cloud.pubsublite_v1.types import PublishRequest
+from google.cloud.pubsublite_v1.types import PubSubMessage
+from google.cloud.pubsublite_v1.types.publisher import PublishRequest
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
-from google.cloud.pubsublite_v1 import PublisherServiceAsyncClient, PublisherOptions
-from google.cloud.pubsublite_v1.types import PubSubMessage, PublishRequest
 
 from telegram import Update
 from telegram.ext import Application
