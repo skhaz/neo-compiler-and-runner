@@ -43,8 +43,6 @@ def run(source: str) -> str:
                 result = subprocess.run(
                     [
                         "em++",
-                        "-O3",
-                        "-flto",
                         "-s",
                         "ENVIRONMENT=node",
                         "-s",
