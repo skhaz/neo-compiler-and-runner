@@ -31,18 +31,9 @@ jobs:
       - name: Build And Push Telegram Service
         uses: docker/build-push-action@v5
         with:
-          context: src/telegram
+          context: .
           push: true
           tags: ${{ secrets.REGISTRY }}/${{ secrets.TELEGRAM_SERVICE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and Push CompileNRun Service
-        uses: docker/build-push-action@v5
-        with:
-          context: src/compilenrun
-          push: true
-          tags: ${{ secrets.REGISTRY }}/${{ secrets.COMPILENRUN_SERVICE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -53,8 +44,8 @@ jobs:
           REGISTRY: ${{ secrets.REGISTRY }}
           GITHUB_SHA: ${{ github.sha }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          PUBSUB_TOPIC_PATH: ${{ secrets.PUBSUB_TOPIC_PATH }}
           SECRET: ${{ secrets.SECRET }}
+          BUCKET: ${{ secrets.BUCKET }}
         run: |
           cat <<EOF | envsubst > service.yaml
           apiVersion: serving.knative.dev/v1
@@ -72,57 +63,11 @@ jobs:
                   run.googleapis.com/cpu-throttling: "true"
                   autoscaling.knative.dev/maxScale: "16"
               spec:
-                containerConcurrency: "80"
-                timeoutSeconds: "60"
+                containerConcurrency: "8"
+                timeoutSeconds: "3600"
                 containers:
                   - image: "$REGISTRY/$TELEGRAM_SERVICE_NAME:$GITHUB_SHA"
                     name: "$TELEGRAM_SERVICE_NAME"
-                    resources:
-                      limits:
-                        cpu: "1000m"
-                        memory: "1Gi"
-                    env:
-                      - name: TELEGRAM_TOKEN
-                        value: "$TELEGRAM_TOKEN"
-                      - name: SECRET
-                        value: "$SECRET"
-                      - name: PUBSUB_TOPIC_PATH
-                        value: "$PUBSUB_TOPIC_PATH"
-          EOF
-
-          gcloud run services replace service.yaml
-          rm -f service.yaml
-
-      - name: Deploy CompileNRun Service to Cloud Run
-        env:
-          COMPILENRUN_SERVICE_NAME: ${{ secrets.COMPILENRUN_SERVICE_NAME }}
-          REGION: ${{ secrets.REGION }}
-          REGISTRY: ${{ secrets.REGISTRY }}
-          GITHUB_SHA: ${{ github.sha }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          BUCKET: ${{ secrets.BUCKET }}
-        run: |
-          cat <<EOF | envsubst > service.yaml
-          apiVersion: serving.knative.dev/v1
-          kind: Service
-          metadata:
-            name: "$COMPILENRUN_SERVICE_NAME"
-            labels:
-              cloud.googleapis.com/location: "$REGION"
-          spec:
-            template:
-              metadata:
-                annotations:
-                  run.googleapis.com/execution-environment: "gen2"
-                  run.googleapis.com/startup-cpu-boost: "true"
-                  run.googleapis.com/cpu-throttling: "true"
-                  autoscaling.knative.dev/maxScale: "16"
-              spec:
-                containerConcurrency: "80"
-                timeoutSeconds: "60"
-                containers:
-                  - image: "$REGISTRY/$COMPILENRUN_SERVICE_NAME:$GITHUB_SHA"
-                    name: "$COMPILENRUN_SERVICE_NAME"
                     resources:
                       limits:
                         cpu: "4000m"
@@ -130,6 +75,8 @@ jobs:
                     env:
                       - name: TELEGRAM_TOKEN
                         value: "$TELEGRAM_TOKEN"
+                      - name: SECRET
+                        value: "$SECRET"
                       - name: BUCKET
                         value: "$BUCKET"
           EOF
