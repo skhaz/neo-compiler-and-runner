@@ -118,7 +118,7 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             result = await asyncio.wait_for(coro, timeout=30)
             await message.reply_text(result)
         except asyncio.TimeoutError:
-            await message.reply_text("Timeout")
+            await message.reply_text("⏰😮‍💨")
             return
     except Exception as e:
         await message.reply_text(f"{e}\n{traceback.format_exc()}")
