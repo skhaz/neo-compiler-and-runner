@@ -65,7 +65,7 @@ def run(source: str) -> str:
                     wasi.stderr_file = "a.out.stderr"
 
                     config = Config()
-                    config.consume_fuel = True
+                    # config.consume_fuel = True
                     engine = Engine(config)
                     store = Store(engine)
                     store.set_wasi(wasi)
@@ -111,12 +111,11 @@ async def on_run(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         coro = asyncio.to_thread(run, text)
-        try:
-            result = await asyncio.wait_for(coro, timeout=120)
-            await message.reply_text(result)
-        except asyncio.TimeoutError:
-            await message.reply_text("⏰😮‍💨")
-            return
+        result = await asyncio.wait_for(coro, timeout=120)
+        await message.reply_text(result)
+    except asyncio.TimeoutError:
+        await message.reply_text("⏰😮‍💨")
+        return
     except Exception as e:
         await message.reply_text(f"{e}\n{traceback.format_exc()}")
 
