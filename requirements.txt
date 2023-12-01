@@ -1,5 +1,5 @@
 google-cloud-storage==2.13.0
 python-telegram-bot==20.6
-starlette==0.32.0
+starlette==0.33.0
 uvicorn==0.24.0
 wasmtime==15.0.0
