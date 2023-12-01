@@ -4,7 +4,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV EMSDK=/emsdk
-ENV PATH=/emsdk:/emsdk/upstream/emscripten:/emsdk/node/16.20.0_64bit/bin:/opt/venv/bin:$PATH
+ENV PATH=/emsdk:/emsdk/upstream/emscripten:/opt/venv/bin:$PATH
 
 FROM base AS builder
 RUN python -m venv /opt/venv
