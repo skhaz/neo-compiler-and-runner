@@ -158,7 +158,6 @@ async def webhook(request: Request):
 application.add_handler(CommandHandler("run", on_run))
 
 app = Starlette(
-    debug=True,
     routes=[
         Route("/", webhook, methods=["POST"]),
     ],
